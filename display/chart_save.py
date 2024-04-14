@@ -1,6 +1,6 @@
-import os
-
 import matplotlib.pyplot as plt
+
+
 def save_to_file(x, y, name, file_name):
     plt.clf()
     plt.plot(x, y)
