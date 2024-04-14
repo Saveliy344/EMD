@@ -23,12 +23,6 @@ class SignalPlotter:
         try:
             x, y = example.generate_default_signal(start, stop, num_points, sinA, cosA, sinW, cosW)
             chart_save.save_to_file(x, y, f"y = {sinA}*sin({sinW}*x) + {cosA}*cos({cosW}*x)", "signal_plot.png")
-            max_x, max_y = get_maximum(x, y)
-            min_x, min_y = get_minimum(x, y)
-            int1_x, int1_y = interpolation(max_x, max_y, start, stop, num_points)
-            int2_x, int2_y = interpolation(min_x, min_y, start, stop, num_points)
-            medium_x, medium_y = get_medium(int1_x, int1_y, int2_x, int2_y)
-            chart_save.save_to_file(medium_x, medium_y, "medium", "medium.png")
             img = Image.open(image_path)
             canvas_width = canvas.winfo_width()
             canvas_height = canvas.winfo_height()
@@ -36,14 +30,6 @@ class SignalPlotter:
             tk_img = ImageTk.PhotoImage(img)
             canvas.create_image(0, 0, anchor=tk.NW, image=tk_img)
             canvas.image = tk_img
-            radius = 20
-            canvas.create_oval(10 - radius, canvas_height / 2 - radius, 10 + radius, canvas_height / 2 + radius,
-                               fill="lightgrey")
-            canvas.create_text(10, canvas_height / 2, text="<", font=("Arial", 12), fill="black", anchor=tk.CENTER)
-            canvas.create_oval(canvas_width - 10 - radius, canvas_height / 2 - radius, canvas_width - 10 + radius,
-                               canvas_height / 2 + radius, fill="lightgrey")
-            canvas.create_text(canvas_width - 10, canvas_height / 2, text=">", font=("Arial", 12), fill="black",
-                               anchor=tk.CENTER)
         except Exception as e:
             messagebox.showerror("Error", f"An error occurred: {str(e)}")
 
@@ -103,6 +89,8 @@ def main():
         canvas,
         "signal_plot.png"
     ))
+    btn_next_step = tk.Button(root, text="Next Step")
+    btn_next_step.grid(row=9, columnspan=2)
     btn_plot.grid(row=7, columnspan=2)
 
     root.rowconfigure(8, weight=1)
