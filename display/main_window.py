@@ -1,10 +1,9 @@
-import tkinter as tk
-from tkinter import messagebox
 from signal_generation import example
 
 import tkinter as tk
 from tkinter import messagebox
 import numpy as np
+from PIL import Image, ImageTk
 
 class SignalGenerator:
     @staticmethod
@@ -15,9 +14,16 @@ class SignalGenerator:
 
 class SignalPlotter:
     @staticmethod
-    def plot_signal(start, stop, num_points, sinA, cosA, sinW, cosW):
+    def plot_signal(start, stop, num_points, sinA, cosA, sinW, cosW, canvas, image_path):
         try:
             example.generate_default_signal(start, stop, num_points, sinA, cosA, sinW, cosW)
+            img = Image.open(image_path)
+            canvas_width = canvas.winfo_width()
+            canvas_height = canvas.winfo_height()
+            img = img.resize((canvas_width, canvas_height), Image.LANCZOS)
+            tk_img = ImageTk.PhotoImage(img)
+            canvas.create_image(0, 0, anchor=tk.NW, image=tk_img)
+            canvas.image = tk_img
         except Exception as e:
             messagebox.showerror("Error", f"An error occurred: {str(e)}")
 
@@ -61,7 +67,8 @@ def main():
     entry_cosW.grid(row=6, column=1)
     entry_cosW.insert(0, "2.0")
 
-
+    canvas = tk.Canvas(root, width=400, height=300)
+    canvas.grid(row=8, columnspan=2, sticky="nsew")  # Растягиваем canvas при изменении размера окна
 
     btn_plot = tk.Button(root, text="Plot Signal", command=lambda: SignalPlotter.plot_signal(
         float(entry_start.get()),
@@ -70,9 +77,19 @@ def main():
         float(entry_sinA.get()),
         float(entry_cosA.get()),
         float(entry_sinW.get()),
-        float(entry_cosW.get())
+        float(entry_cosW.get()),
+        canvas,
+        "signal_plot.png"
     ))
     btn_plot.grid(row=7, columnspan=2)
 
+    # Настройка параметров для масштабирования при изменении размеров окна
+    root.rowconfigure(8, weight=1)
+    root.columnconfigure(0, weight=1)
+    root.columnconfigure(1, weight=1)
+
     # Запуск основного цикла обработки событий
     root.mainloop()
+
+if __name__ == "__main__":
+    main()
