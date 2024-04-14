@@ -1,6 +1,6 @@
 from display import chart_save
-from emd_algorithm.extrimum_localization import get_maximum, get_minimum
-from emd_algorithm.interpolation import interpolation
+from emd_algorithm.extremum_localization import get_maximum, get_minimum
+from emd_algorithm.interpolation import interpolation, get_medium
 from signal_generation import example
 
 import tkinter as tk
@@ -23,10 +23,16 @@ class SignalPlotter:
         try:
             x, y = example.generate_default_signal(start, stop, num_points, sinA, cosA, sinW, cosW)
             chart_save.save_to_file(x, y, f"y = {sinA}*sin({sinW}*x) + {cosA}*cos({cosW}*x)", "signal_plot.png")
+            max_x, max_y = get_maximum(x, y)
+            min_x, min_y = get_minimum(x, y)
+            int1_x, int1_y = interpolation(max_x, max_y, start, stop, num_points)
+            int2_x, int2_y = interpolation(min_x, min_y, start, stop, num_points)
+            medium_x, medium_y = get_medium(int1_x, int1_y, int2_x, int2_y)
+            chart_save.save_to_file(medium_x, medium_y, "medium", "medium.png")
             img = Image.open(image_path)
             canvas_width = canvas.winfo_width()
             canvas_height = canvas.winfo_height()
-            img = img.resize((canvas_width, canvas_height), Image.LANCZOS)
+            img = img.resize((canvas_width, canvas_height), Image.Resampling.LANCZOS)
             tk_img = ImageTk.PhotoImage(img)
             canvas.create_image(0, 0, anchor=tk.NW, image=tk_img)
             canvas.image = tk_img
