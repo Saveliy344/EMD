@@ -9,18 +9,36 @@ import numpy as np
 from PIL import Image, ImageTk
 
 
-class SignalGenerator:
-    @staticmethod
-    def generate_default_signal(start, stop, num_points, sinA, cosA, sinW, cosW):
-        x = np.linspace(start, stop, num_points)
-        y = sinA * np.sin(sinW * x) + cosA * np.cos(cosW * x)
-        return x, y
-
-
 class SignalPlotter:
+    initialized = False
+    x, y = 0, 0
+    step = 0
+    @staticmethod
+    def next_step(start, stop, num_points, canvas, image_path):
+        try:
+            if not SignalPlotter.initialized:
+                return
+            SignalPlotter.step += 1
+            x, y = SignalPlotter.x, SignalPlotter.y
+            x, y = get_medium(*interpolation(*get_maximum(x, y), start, stop, num_points), *interpolation(*get_minimum(x, y), start, stop, num_points))
+            chart_save.save_to_file(x, y, f"Step #{SignalPlotter.step}", "signal_plot.png")
+            canvas.delete("all")
+            img = Image.open(image_path)
+            canvas_width = canvas.winfo_width()
+            canvas_height = canvas.winfo_height()
+            img = img.resize((canvas_width, canvas_height), Image.Resampling.LANCZOS)
+            tk_img = ImageTk.PhotoImage(img)
+            canvas.create_image(0, 0, anchor=tk.NW, image=tk_img)
+            canvas.image = tk_img
+            SignalPlotter.x, SignalPlotter.y = x, y
+        except Exception as e:
+            messagebox.showerror("Error", f"An error occurred: {str(e)}")
+
     @staticmethod
     def plot_signal(start, stop, num_points, sinA, cosA, sinW, cosW, canvas, image_path):
         try:
+            SignalPlotter.initialized = True
+            SignalPlotter.step = 0
             x, y = example.generate_default_signal(start, stop, num_points, sinA, cosA, sinW, cosW)
             chart_save.save_to_file(x, y, f"y = {sinA}*sin({sinW}*x) + {cosA}*cos({cosW}*x)", "signal_plot.png")
             img = Image.open(image_path)
@@ -30,6 +48,8 @@ class SignalPlotter:
             tk_img = ImageTk.PhotoImage(img)
             canvas.create_image(0, 0, anchor=tk.NW, image=tk_img)
             canvas.image = tk_img
+            SignalPlotter.x = x
+            SignalPlotter.y = y
         except Exception as e:
             messagebox.showerror("Error", f"An error occurred: {str(e)}")
 
@@ -89,7 +109,12 @@ def main():
         canvas,
         "signal_plot.png"
     ))
-    btn_next_step = tk.Button(root, text="Next Step")
+    btn_next_step = tk.Button(root, text="Next Step", command=lambda: SignalPlotter.next_step(
+        float(entry_start.get()),
+        float(entry_stop.get()),
+        int(entry_num_points.get()),
+        canvas,
+        "signal_plot.png"))
     btn_next_step.grid(row=9, columnspan=2)
     btn_plot.grid(row=7, columnspan=2)
 
