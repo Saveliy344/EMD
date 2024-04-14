@@ -1,5 +1,6 @@
 from display import chart_save
 from emd_algorithm.extrimum_localization import get_maximum, get_minimum
+from emd_algorithm.interpolation import interpolation
 from signal_generation import example
 
 import tkinter as tk
@@ -22,8 +23,6 @@ class SignalPlotter:
         try:
             x, y = example.generate_default_signal(start, stop, num_points, sinA, cosA, sinW, cosW)
             chart_save.save_to_file(x, y, f"y = {sinA}*sin({sinW}*x) + {cosA}*cos({cosW}*x)", "signal_plot.png")
-            get_maximum(x, y)
-            get_minimum(x, y)
             img = Image.open(image_path)
             canvas_width = canvas.winfo_width()
             canvas_height = canvas.winfo_height()
