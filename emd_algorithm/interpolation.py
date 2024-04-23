@@ -2,11 +2,10 @@ import numpy as np
 from scipy.interpolate import CubicSpline
 
 
-def interpolation(x, y, start, stop, num_points):
+def interpolation(x, y):
     cs = CubicSpline(x, y)
-    new_x = np.linspace(start, stop, num_points)
-    new_y = cs(new_x)
-    return new_x, new_y
+    new_y = cs(x)
+    return x, new_y
 
 
 def get_medium(extremum_1_x, extremum_1_y, extremum_2_x, extremum_2_y):
