@@ -12,52 +12,50 @@ class SignalPlotter:
     initialized = False
     x, y = 0, 0
     step = 0
+    image_path = "signal_plot.png"
 
     @staticmethod
     def choose_file():
         filename = filedialog.askopenfilename(title="Choose a file",
                                               filetypes=(("Text files", "*.txt"), ("All files", "*.*")))
 
-        print("Selected file:", filename)
         if filename:
             data = np.loadtxt(filename)
             SignalPlotter.x = data[:, 0]
             SignalPlotter.y = data[:, 1]
+            SignalPlotter.step = 0
+            SignalPlotter.initialized = True
 
     @staticmethod
-    def next_step(image_path, canvas):
+    def add_image_to_canvas(canvas):
+        img = Image.open(SignalPlotter.image_path)
+        canvas_width = canvas.winfo_width()
+        canvas_height = canvas.winfo_height()
+        img = img.resize((canvas_width, canvas_height), Image.Resampling.LANCZOS)
+        tk_img = ImageTk.PhotoImage(img)
+        canvas.create_image(0, 0, anchor=tk.NW, image=tk_img)
+        canvas.image = tk_img
+
+    @staticmethod
+    def plot_signal(canvas):
         try:
             if not SignalPlotter.initialized:
+                messagebox.showerror("Error", f"Choose file!")
                 return
             SignalPlotter.step += 1
-            x, y = SignalPlotter.x, SignalPlotter.y
-            x, y = get_medium(*interpolation(*get_maximum(x, y)), *interpolation(*get_minimum(x, y)))
-            chart_save.save_to_file(x, y, f"Step #{SignalPlotter.step}", image_path)
-            canvas.delete("all")
-            img = Image.open(image_path)
-            canvas_width = canvas.winfo_width()
-            canvas_height = canvas.winfo_height()
-            img = img.resize((canvas_width, canvas_height), Image.Resampling.LANCZOS)
-            tk_img = ImageTk.PhotoImage(img)
-            canvas.create_image(0, 0, anchor=tk.NW, image=tk_img)
-            canvas.image = tk_img
-            SignalPlotter.x, SignalPlotter.y = x, y
-        except Exception:
-            pass
+            # Showing current step and extremums
+            chart_save.plot_init(f"Step {SignalPlotter.step}")
+            chart_save.plot_chart(SignalPlotter.x, SignalPlotter.y, "Chart", SignalPlotter.step)
+            x_max, y_max = get_maximum(SignalPlotter.x, SignalPlotter.y)
+            x_min, y_min = get_minimum(SignalPlotter.x, SignalPlotter.y)
+            chart_save.plot_points(x_max, y_max, "red", "max_points", SignalPlotter.step)
+            chart_save.plot_points(x_min, y_min, "green", "min_points", SignalPlotter.step)
+            max_interpolation = interpolation(x_max, y_max)
+            min_interpolation = interpolation(x_min, y_min)
+            chart_save.plot_save(SignalPlotter.image_path)
+            SignalPlotter.add_image_to_canvas(canvas)
 
-    @staticmethod
-    def plot_signal(image_path, canvas):
-        try:
-            SignalPlotter.initialized = True
-            SignalPlotter.step = 0
-            chart_save.save_to_file(SignalPlotter.x, SignalPlotter.y, f"Function", image_path)
-            img = Image.open(image_path)
-            canvas_width = canvas.winfo_width()
-            canvas_height = canvas.winfo_height()
-            img = img.resize((canvas_width, canvas_height), Image.Resampling.LANCZOS)
-            tk_img = ImageTk.PhotoImage(img)
-            canvas.create_image(0, 0, anchor=tk.NW, image=tk_img)
-            canvas.image = tk_img
+
         except Exception as e:
             messagebox.showerror("Error", f"An error occurred: {str(e)}")
 
@@ -73,15 +71,10 @@ def main():
 
     btn_choose_file = tk.Button(root, text="Choose File", command=SignalPlotter.choose_file)
 
-    btn_plot = tk.Button(root, text="Plot Signal", command=lambda: SignalPlotter.plot_signal(
-        "signal_plot.png",
+    btn_plot = tk.Button(root, text="Make step", command=lambda: SignalPlotter.plot_signal(
         canvas,
     ))
-    btn_next_step = tk.Button(root, text="Next Step", command=lambda: SignalPlotter.next_step(
-        "signal_plot.png",
-    canvas))
     btn_choose_file.grid(row=0, columnspan=2)
-    btn_next_step.grid(row=9, columnspan=2)
     btn_plot.grid(row=7, columnspan=2)
 
     root.rowconfigure(8, weight=1)

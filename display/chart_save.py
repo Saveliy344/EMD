@@ -1,11 +1,22 @@
 import matplotlib.pyplot as plt
 
 
-def save_to_file(x, y, name, file_name):
+def plot_init(name):
     plt.clf()
-    plt.plot(x, y)
     plt.title(name)
+    plt.grid(True)
     plt.xlabel('x')
     plt.ylabel('y')
-    plt.grid(True)
+
+
+def plot_chart(x, y, label, step_number):
+    plt.plot(x, y, label=f"{label} on step #{step_number}")
+
+
+def plot_points(x, y, color, label, step_number):
+    plt.scatter(x, y, color=color, label=f"{label} on step #{step_number}")
+
+
+def plot_save(file_name):
+    plt.legend()
     plt.savefig(file_name)
