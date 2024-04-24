@@ -1,6 +1,6 @@
 from display import chart_save
 from emd_algorithm.extremum_localization import get_maximum, get_minimum
-from emd_algorithm.interpolation import interpolation, get_medium
+from emd_algorithm.interpolation import interpolation, get_medium, get_diff
 
 import tkinter as tk
 from tkinter import messagebox, filedialog
@@ -45,15 +45,22 @@ class SignalPlotter:
             SignalPlotter.step += 1
             # Showing current step and extremums
             chart_save.plot_init(f"Step {SignalPlotter.step}")
-            chart_save.plot_chart(SignalPlotter.x, SignalPlotter.y, "Chart", SignalPlotter.step)
+            chart_save.plot_chart(SignalPlotter.x, SignalPlotter.y, "blue", "Chart")
             x_max, y_max = get_maximum(SignalPlotter.x, SignalPlotter.y)
             x_min, y_min = get_minimum(SignalPlotter.x, SignalPlotter.y)
-            chart_save.plot_points(x_max, y_max, "red", "max_points", SignalPlotter.step)
-            chart_save.plot_points(x_min, y_min, "green", "min_points", SignalPlotter.step)
-            max_interpolation = interpolation(x_max, y_max)
-            min_interpolation = interpolation(x_min, y_min)
+            chart_save.plot_points(x_max, y_max, "red", "max_points")
+            chart_save.plot_points(x_min, y_min, "green", "min_points")
+            max_interpolation = interpolation(SignalPlotter.x, x_max, y_max)
+            min_interpolation = interpolation(SignalPlotter.x, x_min, y_min)
+            medium = get_medium(*min_interpolation, *max_interpolation)
+            chart_save.plot_chart(*max_interpolation, "orange", "max_interpolation",
+                                  dashed=True)
+            chart_save.plot_chart(*min_interpolation, "yellow", "min_interpolation",
+                                  dashed=True)
+            chart_save.plot_chart(*medium, "black", "medium", dashed=True)
             chart_save.plot_save(SignalPlotter.image_path)
             SignalPlotter.add_image_to_canvas(canvas)
+            SignalPlotter.y = get_diff(SignalPlotter.y, medium[1])
 
 
         except Exception as e:

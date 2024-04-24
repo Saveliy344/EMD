@@ -9,12 +9,13 @@ def plot_init(name):
     plt.ylabel('y')
 
 
-def plot_chart(x, y, label, step_number):
-    plt.plot(x, y, label=f"{label} on step #{step_number}")
+def plot_chart(x, y, color, label, dashed=False):
+    line_style = '--' if dashed else '-'
+    plt.plot(x, y, color=color, linestyle=line_style, label=label)
 
 
-def plot_points(x, y, color, label, step_number):
-    plt.scatter(x, y, color=color, label=f"{label} on step #{step_number}")
+def plot_points(x, y, color, label):
+    plt.scatter(x, y, color=color, label=label)
 
 
 def plot_save(file_name):
