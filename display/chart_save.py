@@ -9,13 +9,13 @@ def plot_init(name):
     plt.ylabel('y')
 
 
-def plot_chart(x, y, color, label, dashed=False):
+def plot_chart(x, y, color, label, linewidth=0.5, dashed=False):
     line_style = '--' if dashed else '-'
-    plt.plot(x, y, color=color, linestyle=line_style, label=label)
+    plt.plot(x, y, color=color, linestyle=line_style, label=label, linewidth=linewidth)
 
 
-def plot_points(x, y, color, label):
-    plt.scatter(x, y, color=color, label=label)
+def plot_points(x, y, color, label, s=2):
+    plt.scatter(x, y, color=color, label=label, s=s)
 
 
 def plot_save(file_name):
