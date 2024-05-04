@@ -1,6 +1,6 @@
 from display import chart_save
 from emd_algorithm.extremum_localization import get_maximum, get_minimum
-from emd_algorithm.interpolation import interpolation, get_medium, get_diff
+from emd_algorithm.interpolation import interpolation, get_medium, get_diff, check_finish_iteration
 
 import tkinter as tk
 from tkinter import messagebox, filedialog
@@ -9,10 +9,24 @@ from PIL import Image, ImageTk
 
 
 class SignalPlotter:
+    mods = []
     initialized = False
     x, y = 0, 0
     step = 0
+
     image_path = "signal_plot.png"
+    mods_image_path = "mods.png"
+
+    is_finished = False
+
+    initial_signal = None
+    signal = None
+
+    counter = 0
+    max_iterations = 6
+
+    modes_counter = 0
+    max_modes = 3
 
     @staticmethod
     def choose_file():
@@ -23,12 +37,17 @@ class SignalPlotter:
             data = np.loadtxt(filename)
             SignalPlotter.x = data[:, 0]
             SignalPlotter.y = data[:, 1]
-            SignalPlotter.step = 0
+            # saving initial signal
+            SignalPlotter.initial_signal = [SignalPlotter.x, SignalPlotter.y]
+            SignalPlotter.signal = [SignalPlotter.x, SignalPlotter.y]
+            SignalPlotter.step = 1
             SignalPlotter.initialized = True
+            SignalPlotter.is_finished = False
+            SignalPlotter.mods = []
 
     @staticmethod
-    def add_image_to_canvas(canvas):
-        img = Image.open(SignalPlotter.image_path)
+    def add_image_to_canvas(canvas, path):
+        img = Image.open(path)
         canvas_width = canvas.winfo_width()
         canvas_height = canvas.winfo_height()
         img = img.resize((canvas_width, canvas_height), Image.Resampling.LANCZOS)
@@ -39,10 +58,12 @@ class SignalPlotter:
     @staticmethod
     def plot_signal(canvas):
         try:
-            if not SignalPlotter.initialized:
-                messagebox.showerror("Error", f"Choose file!")
+            if SignalPlotter.is_finished:
+                messagebox.showinfo("Finished", "Finished")
                 return
-            SignalPlotter.step += 1
+            if not SignalPlotter.initialized:
+                messagebox.showerror("Error", "Choose file!")
+                return
             # Showing current step and extremums
             chart_save.plot_init(f"Step {SignalPlotter.step}")
             chart_save.plot_chart(SignalPlotter.x, SignalPlotter.y, "blue", "Chart")
@@ -59,12 +80,31 @@ class SignalPlotter:
                                   dashed=True)
             chart_save.plot_chart(*medium, "black", "medium", dashed=True)
             chart_save.plot_save(SignalPlotter.image_path)
-            SignalPlotter.add_image_to_canvas(canvas)
+            SignalPlotter.add_image_to_canvas(canvas, SignalPlotter.image_path)
             SignalPlotter.y = get_diff(SignalPlotter.y, medium[1])
+            SignalPlotter.counter += 1
+            if SignalPlotter.counter == SignalPlotter.max_iterations:
+                SignalPlotter.modes_counter += 1
+                SignalPlotter.counter = 0
+                SignalPlotter.step += 1
+                SignalPlotter.mods.append((SignalPlotter.x, SignalPlotter.y))
+                # remain
+                r = get_diff(SignalPlotter.signal[1], SignalPlotter.y)
+                SignalPlotter.signal[1] = r
+                SignalPlotter.y = r
+                if SignalPlotter.modes_counter == SignalPlotter.max_modes:
+                    SignalPlotter.is_finished = True
+                    chart_save.plot_init("Result")
+                    for mod in SignalPlotter.mods:
+                        chart_save.plot_chart(mod[0], mod[1], "blue", "")
+                    chart_save.plot_chart(SignalPlotter.initial_signal[0], SignalPlotter.initial_signal[1],
+                                          "black", "")
+                    chart_save.plot_save(SignalPlotter.mods_image_path, legend=False)
+                    SignalPlotter.add_image_to_canvas(canvas, SignalPlotter.mods_image_path)
 
 
         except Exception as e:
-            messagebox.showerror("Error", f"An error occurred: {str(e)}")
+            messagebox.showerror("Error", f"An error occurred {str(e)}")
 
 
 def main():

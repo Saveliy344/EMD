@@ -18,6 +18,7 @@ def plot_points(x, y, color, label, s=2):
     plt.scatter(x, y, color=color, label=label, s=s)
 
 
-def plot_save(file_name):
-    plt.legend()
+def plot_save(file_name, legend=True):
+    if legend:
+        plt.legend()
     plt.savefig(file_name)
