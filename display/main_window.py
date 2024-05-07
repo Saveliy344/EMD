@@ -37,6 +37,8 @@ class SignalPlotter:
             data = np.loadtxt(filename)
             SignalPlotter.x = data[:, 0]
             SignalPlotter.y = data[:, 1]
+            SignalPlotter.modes_counter = 0
+            SignalPlotter.max_iterations = 0
             # saving initial signal
             SignalPlotter.initial_signal = [SignalPlotter.x, SignalPlotter.y]
             SignalPlotter.signal = [SignalPlotter.x, SignalPlotter.y]
@@ -56,7 +58,7 @@ class SignalPlotter:
         canvas.image = tk_img
 
     @staticmethod
-    def plot_signal(canvas):
+    def plot_signal(canvas, max_modes_entry, max_iterations_entry):
         try:
             if SignalPlotter.is_finished:
                 messagebox.showinfo("Finished", "Finished")
@@ -64,6 +66,9 @@ class SignalPlotter:
             if not SignalPlotter.initialized:
                 messagebox.showerror("Error", "Choose file!")
                 return
+            SignalPlotter.max_modes = int(max_modes_entry.get())
+            SignalPlotter.max_iterations = int(max_iterations_entry.get())
+
             # Showing current step and extremums
             chart_save.plot_init(f"Step {SignalPlotter.step}")
             chart_save.plot_chart(SignalPlotter.x, SignalPlotter.y, "blue", "Chart")
@@ -94,6 +99,7 @@ class SignalPlotter:
                 SignalPlotter.y = r
                 if SignalPlotter.modes_counter == SignalPlotter.max_modes:
                     SignalPlotter.is_finished = True
+                    #Showing result
                     chart_save.plot_init("Result")
                     for mod in SignalPlotter.mods:
                         chart_save.plot_chart(mod[0], mod[1], "blue", "")
@@ -101,7 +107,15 @@ class SignalPlotter:
                                           "black", "")
                     chart_save.plot_save(SignalPlotter.mods_image_path, legend=False)
                     SignalPlotter.add_image_to_canvas(canvas, SignalPlotter.mods_image_path)
-
+                    #Saving mods and signal to files
+                    for index in range(len(SignalPlotter.mods)):
+                        chart_save.plot_init(f"Mode #{index+1}")
+                        chart_save.plot_chart(SignalPlotter.mods[index][0], SignalPlotter.mods[index][1], "blue", "")
+                        chart_save.plot_save(f"Mode #{index+1}.png", legend=False)
+                    chart_save.plot_init("Input signal")
+                    chart_save.plot_chart(SignalPlotter.initial_signal[0], SignalPlotter.initial_signal[1],
+                                          "black", "")
+                    chart_save.plot_save(SignalPlotter.image_path)
 
         except Exception as e:
             messagebox.showerror("Error", f"An error occurred {str(e)}")
@@ -117,12 +131,27 @@ def main():
     canvas.grid(row=8, columnspan=2, sticky="nsew")
 
     btn_choose_file = tk.Button(root, text="Choose File", command=SignalPlotter.choose_file)
-
     btn_plot = tk.Button(root, text="Make step", command=lambda: SignalPlotter.plot_signal(
-        canvas,
+        canvas, max_modes_entry, max_iterations_entry
     ))
+
+    max_modes_label = tk.Label(root, text="Max Modes:")
+    max_modes_entry = tk.Entry(root)
+    max_modes_entry.insert(0, "3")
+
+    max_iterations_label = tk.Label(root, text="Max Iterations:")
+    max_iterations_entry = tk.Entry(root)
+    max_iterations_entry.insert(0, "6")
+
+    btn_close = tk.Button(root, text="Close", command=root.destroy)
+
     btn_choose_file.grid(row=0, columnspan=2)
+    max_modes_label.grid(row=1, column=0)
+    max_modes_entry.grid(row=1, column=1)
+    max_iterations_label.grid(row=2, column=0)
+    max_iterations_entry.grid(row=2, column=1)
     btn_plot.grid(row=7, columnspan=2)
+    btn_close.grid(row=9, columnspan=2)
 
     root.rowconfigure(8, weight=1)
     root.columnconfigure(0, weight=1)
