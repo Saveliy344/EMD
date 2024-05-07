@@ -1,6 +1,6 @@
 from display import chart_save
 from emd_algorithm.extremum_localization import get_maximum, get_minimum
-from emd_algorithm.interpolation import interpolation, get_medium, get_diff, check_finish_iteration
+from emd_algorithm.interpolation import interpolation, get_medium, get_diff
 
 import tkinter as tk
 from tkinter import messagebox, filedialog
