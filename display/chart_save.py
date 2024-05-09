@@ -20,3 +20,9 @@ def plot_points(x, y, color, label, s=2):
 
 def plot_save(file_name):
     plt.savefig(file_name)
+
+
+def save_data_to_file(x, y, file_name):
+    with open(file_name, 'w') as file:
+        for i in range(len(x)):
+            file.write(f"{x[i]} {y[i]}\n")

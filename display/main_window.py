@@ -114,6 +114,7 @@ class SignalPlotter:
                         chart_save.plot_init(f"Mode #{index + 1}")
                         chart_save.plot_chart(SignalPlotter.mods[index][0], SignalPlotter.mods[index][1], "blue", "")
                         chart_save.plot_save(f"Mode #{index + 1}.png")
+                        chart_save.save_data_to_file(SignalPlotter.mods[index][0], SignalPlotter.mods[index][1], f"Mode #{index + 1}.txt")
                     chart_save.plot_init("Input signal")
                     chart_save.plot_chart(SignalPlotter.initial_signal[0], SignalPlotter.initial_signal[1],
                                           "black", "")
