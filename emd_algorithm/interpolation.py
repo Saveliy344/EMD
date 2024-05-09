@@ -19,3 +19,6 @@ def get_medium(x_1, y_1, x_2, y_2):
 def get_diff(y_1, y_2):
     diff_y = np.array([y_1[i] - y_2[i] for i in range(len(y_1))])
     return diff_y
+
+
+

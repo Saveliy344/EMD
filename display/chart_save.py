@@ -9,7 +9,7 @@ def plot_init(name):
     plt.ylabel('y')
 
 
-def plot_chart(x, y, color, label, linewidth=0.5, dashed=False):
+def plot_chart(x, y, color, label, linewidth=1, dashed=False):
     line_style = '--' if dashed else '-'
     plt.plot(x, y, color=color, linestyle=line_style, label=label, linewidth=linewidth)
 
@@ -18,7 +18,5 @@ def plot_points(x, y, color, label, s=2):
     plt.scatter(x, y, color=color, label=label, s=s)
 
 
-def plot_save(file_name, legend=True):
-    if legend:
-        plt.legend()
+def plot_save(file_name):
     plt.savefig(file_name)
