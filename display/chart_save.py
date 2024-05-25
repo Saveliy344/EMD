@@ -1,12 +1,15 @@
 import matplotlib.pyplot as plt
 
 
-def plot_init(name):
+def plot_init(name, show_axis=True):
     plt.clf()
     plt.title(name)
     plt.grid(True)
     plt.xlabel('x')
     plt.ylabel('y')
+    if not show_axis:
+        plt.gca().set_xticks([])
+        plt.gca().set_yticks([])
 
 
 def plot_chart(x, y, color, label, linewidth=1, dashed=False):
@@ -18,7 +21,9 @@ def plot_points(x, y, color, label, s=2):
     plt.scatter(x, y, color=color, label=label, s=s)
 
 
-def plot_save(file_name):
+def plot_save(file_name, show_legend=False):
+    if show_legend:
+        plt.legend()
     plt.savefig(file_name)
 
 

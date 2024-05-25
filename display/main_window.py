@@ -8,6 +8,8 @@ from tkinter import messagebox, filedialog
 import numpy as np
 from PIL import Image, ImageTk
 
+from emd_algorithm.modes_functions import get_amplitude, check_orthogonality
+
 
 class SignalPlotter:
     mods = []
@@ -63,7 +65,11 @@ class SignalPlotter:
     def plot_signal(canvas):
         try:
             if SignalPlotter.is_finished:
-                messagebox.showinfo("Finished", "Finished")
+                if check_orthogonality(SignalPlotter.mods):
+                    messagebox.showinfo("Finished", "Mods are orthogonal")
+                else:
+                    messagebox.showinfo("Finished", "Mods are not orthogonal")
+
                 return
             if not SignalPlotter.initialized:
                 messagebox.showerror("Error", "Choose file!")
@@ -102,23 +108,28 @@ class SignalPlotter:
                 if check_stop_algorithm(SignalPlotter.y, SignalPlotter.eps, SignalPlotter.initial_signal[1]):
                     SignalPlotter.is_finished = True
                     # Showing result
-                    chart_save.plot_init("Result")
-                    for mod in SignalPlotter.mods:
-                        chart_save.plot_chart(mod[0], mod[1], "blue", "")
-                    chart_save.plot_chart(SignalPlotter.initial_signal[0], SignalPlotter.initial_signal[1],
-                                          "black", "")
+                    chart_save.plot_init("Mods", show_axis=False)
+
+                    amplitude = get_amplitude(SignalPlotter.initial_signal[1])
+                    check_orthogonality(SignalPlotter.mods)
+                    for i in range(len(SignalPlotter.mods)):
+                        chart_save.plot_chart(SignalPlotter.mods[i][0], SignalPlotter.mods[i][1] - amplitude * i, "blue", "")
                     chart_save.plot_save(SignalPlotter.mods_image_path)
                     SignalPlotter.add_image_to_canvas(canvas, SignalPlotter.mods_image_path)
+                    # Getting sum of mods
+                    y_sum = np.zeros_like(SignalPlotter.mods[0][1])
                     # Saving mods and signal to files
                     for index in range(len(SignalPlotter.mods)):
                         chart_save.plot_init(f"Mode #{index + 1}")
                         chart_save.plot_chart(SignalPlotter.mods[index][0], SignalPlotter.mods[index][1], "blue", "")
                         chart_save.plot_save(f"Mode #{index + 1}.png")
                         chart_save.save_data_to_file(SignalPlotter.mods[index][0], SignalPlotter.mods[index][1], f"Mode #{index + 1}.txt")
+                        y_sum += SignalPlotter.mods[index][1]
                     chart_save.plot_init("Input signal")
                     chart_save.plot_chart(SignalPlotter.initial_signal[0], SignalPlotter.initial_signal[1],
-                                          "black", "")
-                    chart_save.plot_save(SignalPlotter.image_path)
+                                          "black", "Input signal")
+                    chart_save.plot_chart(SignalPlotter.initial_signal[0], y_sum, "red", "Sum of mods")
+                    chart_save.plot_save(SignalPlotter.image_path, show_legend=True)
 
         except Exception as e:
             messagebox.showerror("Error", f"An error occurred {str(e)}")
